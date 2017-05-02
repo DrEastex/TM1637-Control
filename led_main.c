@@ -5,6 +5,8 @@
 
 #include "led_control.h"
 
+//#define TEST 1
+
 int main() {
   InitLed();
   TimeData_T cur_time;
@@ -12,6 +14,7 @@ int main() {
   struct tm* p;
   time_t timep;
   int tempMin = -1;
+  int tt = 0;
   while( 1) {
     time(&timep);
     p = localtime(&timep);
@@ -22,10 +25,14 @@ int main() {
     } else {
       cur_time.hour = p->tm_hour;
       cur_time.min = p->tm_min;
+#ifdef TEST      
+      cur_time.min = tt++;
+#endif
       SendTime(&cur_time);
       tempMin = p->tm_min;
     }
-    usleep(200000);
+    //usleep(200000);
+    //usleep(500000);
     
   }
 

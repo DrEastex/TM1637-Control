@@ -33,7 +33,9 @@
 
 #define MSG(args...) printf(args) 
 
-#define USE_SYS_GPIO 0
+#define USE_SYS_GPIO 1
+
+#define SLEEP_GAP 100000
 
 typedef struct __SET_COMMAND{
   int b7:1;
@@ -150,6 +152,7 @@ static int gpio_direction(int pin, int dir)
 //value: 0-->LOW, 1-->HIGH
 static int gpio_write(int pin, int value)  
 {  
+    //printf("%d:%d\r\n", pin, value);
     static const char values_str[] = "01";  
     char path[64];  
     int fd;  
@@ -230,6 +233,8 @@ static int ReadPinData(const int pin) {
 #if USE_SYS_GPIO
   return ExecuteCmd(GET_GPIO_VALUE_CMD); 
 #else
+  usleep(100000);
+  return 0;
   return gpio_read((int)pin);
 #endif
 }
@@ -282,6 +287,9 @@ static int WriteByte(int8_t wr_data) {
     IncativeClk();      
     if((wr_data & 0x01)) WriteDataHigh();//LSB first
     else WriteDataLow();
+    #if !USE_SYS_GPIO
+    usleep(SLEEP_GAP);
+    #endif
     wr_data >>= 1;      
     DeInactiveClk();
       
@@ -292,6 +300,9 @@ static int WriteByte(int8_t wr_data) {
   DeInactiveClk();
   IncativeClk();
   SetPinInput();
+  #if !USE_SYS_GPIO
+  usleep(SLEEP_GAP);
+  #endif
   while(ReadDIOData())    
   { 
     count1 +=1;
@@ -299,19 +310,31 @@ static int WriteByte(int8_t wr_data) {
     {
      SetPinOutput();
      WriteDataLow();
+     #if !USE_SYS_GPIO
+     usleep(SLEEP_GAP);
+     #endif
      count1 =0;
     }
     SetPinInput();
   }
   SetPinOutput();
   WriteDataLow();
+  #if !USE_SYS_GPIO
+  usleep(SLEEP_GAP);
+  #endif
   
 }
 
 static int Start() {
   DeInactiveClk();//send start signal to TM1637
   WriteDataHigh(); 
-  WriteDataLow(); 
+#if !USE_SYS_GPIO  
+  usleep(SLEEP_GAP);
+#endif
+  WriteDataLow();
+#if !USE_SYS_GPIO  
+  usleep(SLEEP_GAP);
+#endif
   //IncativeClk();
   return 0;
 }
@@ -325,7 +348,13 @@ static int Stop() {
 */
   DeInactiveClk();
   WriteDataLow();
+  #if !USE_SYS_GPIO
+  usleep(SLEEP_GAP);
+  #endif
   WriteDataHigh();
+  #if !USE_SYS_GPIO
+  usleep(SLEEP_GAP);
+  #endif
   
 }
 
@@ -458,11 +487,11 @@ static int ClearDisplay() {
   DisplayDataByAddr(0x03,9);
   #else
 
-
+  //Start();
+  //exit(0);
 
   #endif
 }
-
 
 
 
@@ -496,6 +525,8 @@ int SendTime(const TimeData_T* const _time) {
 }
 
 int DeInitLed(const TimeData_T* const _time) {
+  ClearDisplay();
+
 #if USE_SYS_GPIO
   char cmd[128] = "";
   sprintf(cmd, "echo %d > /sys/class/gpio/unexport", LED_DIO);
@@ -503,8 +534,7 @@ int DeInitLed(const TimeData_T* const _time) {
 #else 
   gpio_unexport(LED_DIO);
 #endif
-  ClearDisplay();
-
+  
  }
 
 
