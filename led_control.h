@@ -10,6 +10,7 @@ typedef struct __TIMEDATA {
 
 int InitLed();
 int SendTime(const TimeData_T* const _time);
+int FlashOpts(const int min);
 int DeInitLed();
 
 
