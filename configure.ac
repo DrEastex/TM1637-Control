@@ -2,12 +2,13 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT(led_control, 1.0, shengxiao.guo@bitmain.com)
+AC_INIT(led_control, 1.0, support@bitmain.com)
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src/led_control.h])
 AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
+AC_CANONICAL_BUILD
 AC_PROG_CC
 
 # Checks for libraries.

@@ -1,8 +1,7 @@
 #
-## Makefile.am
+# Makefile.am
+# 2017.5.4, eastex
 #
-## 2017-05-04, eastex 
-# 
-#
+
 AUTOMAKE_OPTIONS = foreign
 SUBDIRS = src
